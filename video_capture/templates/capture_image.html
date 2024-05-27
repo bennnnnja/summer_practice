@@ -1,0 +1,66 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Видеопоток -->
+        <div class="col-md-6">
+            <form id="capture-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <video id="preview" autoplay></video>
+                <button type="button" id="capture-button">Считать эмоции</button>
+            </form>
+        </div>
+        <!-- Контейнер для результатов -->
+        <div class="col-md-6">
+            <h2>Распознанные эмоции:</h2>
+            <p id="emotion-result"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const video = document.getElementById('preview');
+    const form = document.getElementById('capture-form');
+    const button = document.getElementById('capture-button');
+    const resultElement = document.getElementById('emotion-result'); // Элемент для отображения результата
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+   .then(function(stream) {
+        video.srcObject = stream;
+    })
+   .catch(function(err) {
+        console.log("An error occurred: " + err);
+    });
+
+    button.addEventListener('click', function(e) {
+        e.preventDefault(); // Предотвращаем стандартное действие кнопки
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imgData = canvas.toDataURL('image/png');
+
+        // Создаем новый экземпляр FormData и добавляем в него данные изображения
+        let formData = new FormData(form);
+        formData.append('img_data', imgData);
+
+        // Отправляем изображение на сервер
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (!response.ok) throw new Error('Network response was not ok.');
+            return response.json(); // Изменено на json(), так как ожидается JSON-ответ
+        }).then(data => {
+            // Обновляем элемент с результатом
+            resultElement.textContent = `Эмоция: ${data.emotion}, Вероятность: ${(data.probability * 100).toFixed(2)}%`;
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+
+</script>
+{% endblock %}
