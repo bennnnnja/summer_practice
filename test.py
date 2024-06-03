@@ -4,7 +4,7 @@ from video_capture.views import resize_image
 
 detector = EmotionDetector()  # Создаем экземпляр детектора
 
-img = cv2.imread('angry.png')
+img = cv2.imread('surpr5.png')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 emotion, probability = detector.predict_emotion(gray)
 print(emotion, probability)

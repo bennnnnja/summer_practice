@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 class EmotionDetector:
-    def __init__(self, model_path='model.h5'):
+    def __init__(self, model_path='model120.h5'):
         self.model = tf.keras.models.load_model(model_path)
         self.emotions = ['angry', 'disgusted', 'fearful', 'happy', 'neutral', 'sad', 'surprised']
 
